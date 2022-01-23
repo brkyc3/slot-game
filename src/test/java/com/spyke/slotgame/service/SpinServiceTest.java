@@ -130,7 +130,7 @@ class SpinServiceTest {
             spinServiceWithoutMocks.setTheftService(mockTheftService);
             Mockito.when(mockTheftService.stealFromRandomPlayer(Mockito.anyString()))
                     .thenReturn(ThreadLocalRandom.current().nextLong(0, 100));
-            HashMap<SpinResult, Integer> totalCountsForAllThreads = new HashMap<>();
+
 
             int numOfThreads = ThreadLocalRandom.current().nextInt(50, 200);
             ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -142,6 +142,7 @@ class SpinServiceTest {
                 results.add((FutureTask<HashMap<SpinResult, Integer>>) executor.submit(() -> validateTotalCountForPlayer(player)));
             }
 
+            HashMap<SpinResult, Integer> totalCountsForAllThreads = new HashMap<>();
             for (var result : results) {
                 for (var entry : result.get().entrySet()) {
                     totalCountsForAllThreads.put(entry.getKey(), totalCountsForAllThreads.getOrDefault(entry.getKey(), 0) + entry.getValue());
