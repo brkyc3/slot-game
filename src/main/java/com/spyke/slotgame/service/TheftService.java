@@ -56,11 +56,13 @@ public class TheftService {
         boolean locked = false;
         try {
             Player selectedPlayer = selectRandomOnlinePlayer(requestingPlayer);
+            log.info("Selected player for stealing is {}", selectedPlayer.getId());
             lock = stripedLocks.get(selectedPlayer.getId());
             locked = lock.tryLock(Constant.LOCK_MAX_WAIT_TIME_IN_SECONDS, TimeUnit.SECONDS);
             if (locked) {
                 long halfOfPlayersCoins = (long) Math.ceil(selectedPlayer.getCoinAmount() / 2.0);
                 long otherHalfOfPlayersCoins = (long) Math.floor(selectedPlayer.getCoinAmount() / 2.0);
+                log.info("Stealing {} from player {}", halfOfPlayersCoins,selectedPlayer.getId());
                 selectedPlayer.setCoinAmount(halfOfPlayersCoins);
                 Player savedPlayer = playerRepository.save(selectedPlayer);
                 notifyPlayer(savedPlayer.getId(), savedPlayer.getCoinAmount());
