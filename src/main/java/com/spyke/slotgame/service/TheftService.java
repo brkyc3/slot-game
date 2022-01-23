@@ -65,6 +65,7 @@ public class TheftService {
                 Player savedPlayer = playerRepository.save(selectedPlayer);
                 notifyPlayer(savedPlayer.getId(), savedPlayer.getCoinAmount());
                 lock.unlock();
+                locked = false;
                 return otherHalfOfPlayersCoins;
             } else {
                 throw new RuntimeException(String.format("Stealing lock timed out for user %s", selectedPlayer.getId()));
