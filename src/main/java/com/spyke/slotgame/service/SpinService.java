@@ -8,6 +8,7 @@ import com.spyke.slotgame.message.response.SpinResponse;
 import com.spyke.slotgame.repository.PlayerRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
@@ -30,7 +31,7 @@ public class SpinService {
     private final PlayerRepository playerRepository;
     private final ArrayList<SpinResult> gameTable = new ArrayList<>();
     private final MongoTemplate mongoTemplate;
-    private final AtomicInteger circularSpinCounter = new AtomicInteger(-1);
+    private int spinCounter = 0;
     @Autowired
     private TheftService theftService;
 
@@ -52,6 +53,7 @@ public class SpinService {
                 throw new RuntimeException("Player has not enough spin amount");
 
             SpinResult randomSpinResult = getNextRandomSpinResult();
+            log.info("Spin result , {}", randomSpinResult);
 
             Long earnedPrice = calculateEarnedPrice(player.getId(), randomSpinResult);
 
@@ -74,11 +76,13 @@ public class SpinService {
 
     }
 
+    @Synchronized
     public SpinResult getNextRandomSpinResult() {
-        int count = circularSpinCounter.updateAndGet(this::incrementCircularCounter);
-        SpinResult spinResult = gameTable.get(count);
-        log.info("Spin result , {}", spinResult);
-        return spinResult;
+        int counter = spinCounter++ % 100;
+        if (counter == 0) {
+            shuffleGameTable();
+        }
+        return gameTable.get(counter);
     }
 
 
@@ -100,7 +104,6 @@ public class SpinService {
 
     private Integer incrementCircularCounter(Integer currentValue) {
         if (++currentValue == 100) {
-            shuffleGameTable();
             return 0;
         } else {
             return currentValue;
