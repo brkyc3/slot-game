@@ -17,6 +17,11 @@ server:
 
 logging:
   level:
-    org.springframework: DEBUG
+    org.springframework: error
+    com:
+      spyke:
+        slotgame:
+          service:
+            SpinService: error
 
 

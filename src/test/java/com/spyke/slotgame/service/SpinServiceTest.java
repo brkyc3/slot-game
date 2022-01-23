@@ -85,6 +85,9 @@ class SpinServiceTest {
     public void whenValidRequest_ThenTotalCountShouldMatchWithPercent() {
         Player player = getNormalPlayer();
         try {
+            spinServiceWithoutMocks.setTheftService(mockTheftService);
+            Mockito.when(mockTheftService.stealFromRandomPlayer(Mockito.anyString()))
+                    .thenReturn(ThreadLocalRandom.current().nextLong(0, 100));
             HashMap<SpinResult, Integer> spinResultCountMap = validateTotalCountForPlayer(player);
             assertCountMapMatchesWithConstantPercents(spinResultCountMap,1);
 
@@ -111,15 +114,11 @@ class SpinServiceTest {
 
     public HashMap<SpinResult, Integer> validateTotalCountForPlayer(Player player) {
         HashMap<SpinResult, Integer> spinResultCountMap = new HashMap<>();
-
-        spinServiceWithoutMocks.setTheftService(mockTheftService);
-        Mockito.when(mockTheftService.stealFromRandomPlayer(Mockito.anyString()))
-                .thenReturn(ThreadLocalRandom.current().nextLong(0, 2000));
-        for(int i = 0;i<100;i++) {
-            SpinResponse spinResponse = spinServiceWithoutMocks.spin(new SpinRequest(player.getId()));
-            Assertions.assertTrue(spinResponse.isSuccess(), "Spin response should be true");
-            spinResultCountMap.put(spinResponse.getSpinResult(),spinResultCountMap.getOrDefault(spinResponse.getSpinResult(),0)+1);
-        }
+            for (int i = 0; i < 100; i++) {
+                SpinResponse spinResponse = spinServiceWithoutMocks.spin(new SpinRequest(player.getId()));
+                Assertions.assertTrue(spinResponse.isSuccess(), "Spin response should be true");
+                spinResultCountMap.put(spinResponse.getSpinResult(), spinResultCountMap.getOrDefault(spinResponse.getSpinResult(), 0) + 1);
+            }
         return spinResultCountMap;
     }
 
@@ -128,9 +127,12 @@ class SpinServiceTest {
     public void whenValidRequestsFromMultiUser_ThenTotalCountShouldMatchWithPercent() {
         Player player = getNormalPlayer();
         try {
+            spinServiceWithoutMocks.setTheftService(mockTheftService);
+            Mockito.when(mockTheftService.stealFromRandomPlayer(Mockito.anyString()))
+                    .thenReturn(ThreadLocalRandom.current().nextLong(0, 100));
             HashMap<SpinResult, Integer> totalCountsForAllThreads = new HashMap<>();
 
-            int numOfThreads = ThreadLocalRandom.current().nextInt(2, 10);
+            int numOfThreads = ThreadLocalRandom.current().nextInt(50, 200);
             ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
             executor.setCorePoolSize(numOfThreads);
             executor.initialize();
