@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: slot-game
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/localdb?retryWrites=true&w=majority
+
+server:
+  port: 8991
+
+logging:
+  level:
+    org.springframework: INFO
